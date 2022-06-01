@@ -1,3 +1,7 @@
+'''
+Code used to preprocess all data. Preprocessed version is stored in file "FinalData.xlsx"
+'''
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -118,44 +122,13 @@ def merge_with_rest_of_data(org_data, org_predicted_grades, org_predicted_rankin
     return merged
 
 
-def remove_outliers(merged_data):
-    all_outliers = []
-    for datatype in ['Org', 'Counterpart']:
-        for stereotype_activation in stereotype_activation_types:
-            for vignette_number in all_vignettes:
-                applicable_data = merged_data[(merged_data["Datatype"] == datatype) & (merged_data['Stereotype Activation'] == stereotype_activation)]
-
-                predictions = applicable_data[str(vignette_number)+'_grade']
-                first_quantile = predictions.quantile(.25)
-                third_quantile = predictions.quantile(.75)
-                inter_quantile_range = third_quantile-first_quantile
-
-                lower_outliers = predictions.index[predictions < (first_quantile - 1.5 * inter_quantile_range)].values
-                upper_outliers = predictions.index[predictions > (third_quantile + 1.5 * inter_quantile_range)].values
-                all_outliers.extend(lower_outliers)
-                all_outliers.extend(upper_outliers)
-                #all_outliers = [y for x in [lower_outliers, upper_outliers] for y in x]
-                #merged_data.loc[all_outliers, vignette_number] = ' '
-
-    # set_all_outliers = set(all_outliers)
-    # merged_data = merged_data.drop(set_all_outliers, axis=0)
-    import collections
-    duplicates = [item for item, count in collections.Counter(all_outliers).items() if count > 1]
-    outlier_data = merged_data.loc[duplicates]
-
-    merged_data = merged_data.drop([125, 160, 122, 166], axis=0)
-    # merged_data = merged_data.drop(upper_outliers, axis=0).reset_index(drop=True)
-    print(merged_data.shape)
-    return merged_data
-
-
 def complete_formatting_and_preprocessing():
     counter, original = load_file()
     original = filter_out_wrong_grade_range(original, dtype_original_grade_pred.keys(), question_id_original)
     original = filter_out_wrong_grade_orders(original, dtype_original_grade_pred.keys(),
                                              dtype_original_grade_ranking.keys())
     predicted_grades_org, predicted_rankings_org = extract_vignette_grades(original, question_id_original)
-    #
+
     counter = filter_out_wrong_grade_range(counter, dtype_counterpart_grade_pred.keys(), question_id_counterpart)
     counter = filter_out_wrong_grade_orders(counter, dtype_counterpart_grade_pred.keys(),
                                             dtype_counterpart_grade_ranking.keys())
@@ -167,7 +140,3 @@ def complete_formatting_and_preprocessing():
     merged = filter_out_short_responses(merged)
     merged.drop([125], axis=0)
     merged.to_excel('FinalData.xlsx')
-    #outlier_removed = remove_outliers(merged)
-    # print(outlier_removed.shape)
-    #
-    # outlier_removed.to_excel('04_04_Without_Outliers.xlsx')

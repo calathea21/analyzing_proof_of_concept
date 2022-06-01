@@ -1,7 +1,10 @@
+'''
+Code used visualize preprocessed data. Statistical tests on data were conducted using Jamovi software.
+'''
+
 import pandas as pd
 import plotnine as p9
 import patchworklib as pw
-from data_formatting_and_preprocessing import complete_formatting_and_preprocessing
 import scipy.stats
 #p9.options.figure_size = (7, 6.1)
 #p9.options.figure_size = (8.63, 6.1)
